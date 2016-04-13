@@ -8,8 +8,12 @@
 #include <QtWidgets>
 #include <QTextEdit>
 
+#include "splash.h"
+#include "currentserialport.h"
+
 #ifdef QT_DEBUG
 //    #define MENU_TEST
+    #define TEST_SPLASH
 #endif
 
 namespace Ui {
@@ -34,11 +38,16 @@ private slots:
     void HelpContents();
     void HelpAbout();
 
+    void ShowSplash();
+    void serialport(); //change this after getting splash to work
+
 private:
     Ui::MainWindow *ui;
+    CurrentSerialPort* SerialPort;
 
     void ConnectMenu();
     void LoadDisplay();
+    void ConnectSplash();
     bool SaveFile(const QString& fileName);
     QTextEdit* Display;
 

@@ -8,11 +8,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ConnectMenu();
     LoadDisplay();
+    ConnectSplash();
     saveFileName = "";
 }
 
 MainWindow::~MainWindow()
 {
+    delete SerialPort;
     delete Display;
     delete ui;
 }
@@ -21,6 +23,37 @@ void MainWindow::LoadDisplay()
     Display = new QTextEdit;
     setCentralWidget(Display);
 
+}
+
+void MainWindow::ConnectSplash()
+{
+#ifndef QT_DEBUG
+    QTimer* init_timer = new QTimer(this);
+    init_timer->singleShot(100, this, SLOT(showSplash()));
+#endif
+
+#ifdef TEST_SPLASH
+    QTimer* init_timer = new QTimer(this);
+    init_timer->singleShot(100, this, SLOT(ShowSplash()));
+#endif
+
+}
+
+void MainWindow::ShowSplash()
+{
+    const int five_sec = 5000;
+    SplashDialog* splash = new SplashDialog();
+    splash->setModal( true );
+    splash->show();
+
+    QTimer* splash_timer = new QTimer(this);
+    splash_timer->singleShot(five_sec, this, SLOT(serialport()));
+}
+
+void MainWindow::serialport() //change name!!
+{
+    SerialPort = new CurrentSerialPort(this);
+    if(!SerialPort->CheckSerialPort()) delete SerialPort;
 }
 
 void MainWindow::ConnectMenu()
@@ -108,6 +141,7 @@ void MainWindow::ToolConnect()
 #ifdef MENU_TEST
     QMessageBox::information( this,"ToolConnect", "Tool Connect OK!");
 #endif
+    serialport();
 }
 
 void MainWindow::HelpContents()
@@ -117,11 +151,23 @@ void MainWindow::HelpContents()
 #endif
 }
 
-void MainWindow::HelpAbout()
+void MainWindow::HelpAbout()//don't forget to change this for new software
 {
 #ifdef MENU_TEST
     QMessageBox::information( this,"Help About", "Help About OK!");
 #endif
+    QString s;
+    QTextStream toabout(&s);
+
+    toabout << tr("The <b>Basic Software</b> is used with the <br>") <<
+               tr("<b><i>James Instruments Inc.</i></b> Basic.<br><br>")<<
+               tr("USA: +1773.4636565<br>")<<
+               tr("Europe: +31.548.659032<br>")<<
+               tr("Email: <a href=\"mailto:info@ndtjames.com?Subject=Reboundlinx\" target=\"_top\">info@ndtjames.com</a><br>")<<
+               tr("Web: <a href=\"http://www.ndtjames.com\">http://www.ndtjames.com</a><br>")<<
+               tr("Copyright 2016");
+
+    QMessageBox::information(this, tr("About Basic"), s);
 }
 
 bool MainWindow::SaveFile(const QString &fileName)
